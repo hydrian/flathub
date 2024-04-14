@@ -1,0 +1,34 @@
+---
+id: net.tygerclan.cstitch
+runtime: org.kde.Platform
+runtime-version: '5.15-23.08'
+sdk: org.kde.Sdk
+command: 'cstitch'
+finish-args:
+  - --share=ipc
+  - --socket=fallback-x11
+  - --socket=wayland
+  - --device=dri
+  - --filesystem=xdg-documents
+modules:
+  - name: cstitch
+    buildsystem: simple
+    build-commands:
+      - "doc/createDocs.py"
+      - "qmake -project"
+      - './progen.py'
+      - "cd icons && cp cstitch.svg 32x32_cstitch.svg"
+      - "cd icons && for FILE in *.svg ; do  rsvg-convert  --width 32 --keep-aspect-ratio ${FILE} > ${FILE%.*}.png ; done"
+      - 'qmake'
+      - 'make'
+      - "install -Dm755 cstitch /app/bin/cstitch"
+      - "install -Dm644 cstitch.desktop  /app/share/applications/${FLATPAK_ID}.desktop"
+      - "install -Dm644 icons/cstitch.svg /app/share/icons/hicolor/scalable/apps/${FLATPAK_ID}.svg"
+      - "desktop-file-edit --set-icon=${FLATPAK_ID} /app/share/applications/${FLATPAK_ID}.desktop"
+      
+    builddir: true
+    sources: 
+      - type: git
+        url: 'https://git.code.sf.net/p/cstitch/code'
+        tag: 0.9.8
+        commit: "0a82b07dce1ad040991167b91f12e265a7618d9e"
